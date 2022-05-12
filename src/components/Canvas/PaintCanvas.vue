@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script>
+<script>  //記念
 import Konva from "konva";
 import axios from "axios";
 export default {
