@@ -12,12 +12,13 @@
   </div>
 </template>
 
-<script>  //記念
+<script>
+// 上のrefはidとして書いても良い。loaderの中ではidとして書かれた例があり
 import Konva from "konva";
 import axios from "axios";
-export default {
+export default {//JSでは{}はオブジェクト生成
   name: "paint-canvas",
-  props: {
+  props: {// ここではスケッチの領域のような、変わらないものを定義する
     mode: {
       type: String,
       default: ""
@@ -39,8 +40,8 @@ export default {
       default: ""
     }
   },
-  data: () => ({
-    stage: null,
+  data: () => ({// dataの方で変数の定義。propsと違いアプリが動いている時に変わりそうな値
+    stage: null, //クラスの要素
     context: null,
     canvasGroup: [],
     drawingLayer: null,
@@ -56,21 +57,29 @@ export default {
     height: 720
   }),
   mounted: function() {  //関数宣言。ここは関数名なし。()内は引数。以下は{}の中が処理内容
-  //mountedは起動させた時に行われるプログラム？
+  //mountedは起動させた時に行われるプログラム
+  //mountedも一つの関数
     var container = this.$refs.container;  //変数宣言。var 変数名＝値
+    //一番上でref= 名前をつけたモノは、全て$sで代入される
+    //なのでここではthis.container.container と同じ
+    //定義というよりHTMLのエレメントを呼び出している
+    //エレメント＝属性と似たような概念    
     this.stage = new Konva.Stage({  //上のdataブロックの中でstage:nullが明記
+    //インスタンス化。stageもKonvaの中の１つのクラス
+    //this要素を指定している
       container,
       width: this.width,
       height: this.width
     });
-    this.drawingLayer = new Konva.Layer();
+    this.drawingLayer = new Konva.Layer();  //drawingLayerの要素を定義している
     this.stage.add(this.drawingLayer);
 
     this.canvasGroup.push(this.drawingScope());
     this.previewLayer();
   },
-  methods: {
-    drawingScope: function() {
+  methods: {  //コロンの意味は、{}の中の説明
+  // 複数の関数を定義している
+    drawingScope: function() {  //drawingScopeの役割は？
       let canvas = document.createElement("canvas");  //letも変数宣言。しかし再宣言するとエラーになり、if文の中などでも使うことができない
       canvas.ref = "canvas_" + this.layerCount;
       canvas.width = this.width;
@@ -96,7 +105,7 @@ export default {
 
       return canvas;
     },
-    mousedown: function() {
+    mousedown: function() {  //マウスを押した時の挙動
       this.isPaint = true;
       this.lastPointerPosition = this.stage.getPointerPosition();
       this.undoStack.push({
@@ -260,7 +269,7 @@ export default {
     onBtnLayerClick: function(e) {
       this.layerActive = Number(e.srcElement.id.split("_")[2]);
     },
-    onSave: function() {
+    onSave: function() {  //消すとエラー？
       axios
         .post("https://www.ultratks.live/api/sketch/stroke/save_history", {
           request_type: "save_history"
@@ -289,7 +298,7 @@ export default {
       };
     }
   },
-  watch: {
+  watch: {  //定義された値が変わった時の対応が書かれている
     mode: function() {
       if (this.mode === "brush") {
         this.context.lineWidth = this.brushSize;
@@ -297,11 +306,24 @@ export default {
         this.context.lineWidth = this.eraserSize;
       }
     },
+
     brushColor: function() {
       if (this.mode === "brush") {
         this.context.strokeStyle = this.brushColor;
       }
     },
+    // // ---------------------------------------------------------------------
+    // brushColor: function() {
+    //   if (this.mode === "brush") {
+    //     // color の数字を１６進数の色のカラーコードに変換
+    //     color = this.colorConverter(this.brushColor);
+
+    //     this.context.strokeStyle = color;
+    //     // this.context.strokeStyle = this.brushColor;
+    //   }
+    // },
+    // // ---------------------------------------------------------------------
+
     brushSize: function() {
       if (this.mode === "brush") {
         this.context.lineWidth = this.brushSize;
@@ -366,4 +388,12 @@ export default {
 }
 </style>
 <!-- container -->
-<!-- 最初の<templete>htmlの中身と、起動時に実行されるmountedの部分にあり -->
+<!-- 最初の<templete>htmlの中身と、起動時に実行されるmountedの部分にあり、つまり初期設定？
+    ここのブラシの設定なども変更か？
+    CSSで書かれている。見た目を定義している 
+    HTMLはレイアウトを定義する。何がどこにあるか
+    CSSはレイアウトはの文字の大きさだったり、カラーだったりを定義。たただのマークで簡単な記述しかできない
+    JSはなんでもできる。JSだけでもアプリを作ることは可能
+    borderはスケッチ領域を黒で囲っている
+    HTMLでclass="container"となっているものは、CSSで.クラスの中身とすると、
+    そのクラス全体にコレが反映されるということになる-->
