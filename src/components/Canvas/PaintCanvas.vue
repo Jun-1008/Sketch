@@ -18,18 +18,22 @@ import Konva from "konva";
 import axios from "axios";
 export default {//JSでは{}はオブジェクト生成
   name: "paint-canvas",
+// 【第5ブロック】---------------------------------------------------------------------------
   props: {// ここではスケッチの領域のような、変わらないものを定義する
     mode: {
       type: String,
       default: ""
     },
     brushColor: {
-      type: String,
-      default: ""
+      type: Number,
+      // type: String,//デフォ
+      default: 0
+      // default: ""//デフォルト、太さの調整が可能
     },
-    brushSize: {  //後のmethodの中でも登場し、brushSizeが代入されている。
-      type: Number,  //下のdata: と異なりここでの変更は反映されなのもそれが原因？
-      default: 3
+    // brushSize: {
+    grayscale: {
+      type: Number,//下のdata: と異なりここでの変更は反映されなのもそれが原因？
+      default: 0 //3
     },
     eraserSize: {
       type: Number,
@@ -89,11 +93,14 @@ export default {//JSでは{}はオブジェクト生成
       });
       this.drawingLayer.add(drawingScope);
       this.stage.draw();
-
+// 【第6ブロック】--------------------------------------------------------------------------------------------------------------------------------------------
       this.context = canvas.getContext("2d");
       this.context.strokeStyle = this.brushColor;  //strokestyleで線の色を変える事が出来る
       this.context.lineJoin = "round";
-      this.context.lineWidth = this.brushSize;  //左辺のlineWidthが線の太さ。brushsizeは最初の方のpropsの中で登場. 
+      this.context.strokeStyle = this.grayscale;  //
+      // this.context.lineWidth = this.brushSize;  //左辺のlineWidthが線の太さ。brushsizeは最初の方のpropsの中で登場. 
+      // this.context.lineWidth = this.grayscale;  //デフォルト
+
 
       // add event
       drawingScope.on("mousedown", this.mousedown);
@@ -138,10 +145,10 @@ export default {//JSでは{}はオブジェクト生成
       if (!this.isPaint) {
         return;
       }
-      if (this.isTargetMode("brush")) {  //一番左の描くブラシ
+      if (this.isTargetMode("brush")) {
         this.context.globalCompositeOperation = "source-over";
       }
-      if (this.isTargetMode("eraser")) { //左から二番目の消しゴム
+      if (this.isTargetMode("eraser")) {
         this.context.globalCompositeOperation = "destination-out";
       }
 
@@ -298,37 +305,45 @@ export default {//JSでは{}はオブジェクト生成
       };
     }
   },
-  watch: {  //定義された値が変わった時の対応が書かれている
+  watch: {  //定義された値が変わった時の対応が書かれている。
+// 【第7ブロック】--------------------------------------------------------------------------------------------------------
     mode: function() {
       if (this.mode === "brush") {
-        this.context.lineWidth = this.brushSize;
+        // this.context.lineWidth = this.brushSize;
+        this.context.strokeStyle = this.grayscale;
       } else {
         this.context.lineWidth = this.eraserSize;
       }
     },
-
-    brushColor: function() {
-      if (this.mode === "brush") {
-        this.context.strokeStyle = this.brushColor;
-      }
-    },
-    // // ---------------------------------------------------------------------
-    // brushColor: function() {
+// 【第8ブロック】----------------------------------------------------------------------------------------------------------------
+    // brushColor: function() {  大元
     //   if (this.mode === "brush") {
-    //     // color の数字を１６進数の色のカラーコードに変換
-    //     color = this.colorConverter(this.brushColor);
-
-    //     this.context.strokeStyle = color;
-    //     // this.context.strokeStyle = this.brushColor;
+    //     this.context.strokeStyle = this.brushColor;//strokestyleで線の色を変える
     //   }
     // },
     // // ---------------------------------------------------------------------
-
-    brushSize: function() {
+    brushColor: function() {
       if (this.mode === "brush") {
-        this.context.lineWidth = this.brushSize;
+        // color の数字を１６進数の色のカラーコードに変換。
+        // color = this.colorConverter(this.brushColor);//必要？
+        // this.context.strokeStyle = 'red'; //strokestyleで線の色を変える.ここに追記！！！！！！！！！！！！
+        // this.context.strokeStyle = this.brushColor; //ここに追記！！！！！！！！！！！！
+        this.context.strokeStyle = 0x808080; //ここに追記！！！！！！！！！！！！
+
+        // this.context.strokeStyle = color; //デフォルト
+        // this.context.strokeStyle = this.brushColor;
       }
     },
+    // // ---------------------------------------------------------------------
+        // brushSize: function() {
+    grayscale: function() {
+      if (this.mode === "brush") {
+        // this.context.lineWidth = this.grayscale; //左辺のlineWidthが線の太さ。strokeStyle
+        this.context.strokeStyle = this.grayscale; //左辺のlineWidthが線の太さ。strokeStyle
+        // this.context.lineWidth = this.brushSize; //左辺のlineWidthが線の太さ。
+      }
+    },
+
     eraserSize: function() {
       if (this.mode === "eraser") {
         this.context.lineWidth = this.eraserSize;
