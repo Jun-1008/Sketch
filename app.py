@@ -31,7 +31,7 @@ def save_history():
         # file_json_pen_history.write(json_pen_history)
         # file_json_pen_history.close() #
 
-        data = data.split(',')#冒頭の不要なデータを消去
+        data = data.split(',')#冒頭の不要なデータを消去.
         data = data[1]
         # data = data.replace("'", "")
 
