@@ -83,7 +83,7 @@ export default {//JSでは{}はオブジェクト生成
   },
   methods: {  //コロンの意味は、{}の中の説明
   // 複数の関数を定義している
-    drawingScope: function() {  //drawingScopeの役割は？
+    drawingScope: function() {  //drawingScopeの役割は？ここで定義している。レイヤーを作っている。重ねるマーク。今回は不要
       let canvas = document.createElement("canvas");  //letも変数宣言。しかし再宣言するとエラーになり、if文の中などでも使うことができない
       canvas.ref = "canvas_" + this.layerCount;
       canvas.width = this.width;
@@ -94,10 +94,12 @@ export default {//JSでは{}はオブジェクト生成
       this.drawingLayer.add(drawingScope);
       this.stage.draw();
 // 【第6ブロック】--------------------------------------------------------------------------------------------------------------------------------------------
-      this.context = canvas.getContext("2d");
-      this.context.strokeStyle = this.brushColor;  //strokestyleで線の色を変える事が出来る
+      this.context = canvas.getContext("2d");//contextに2D画像に適したメソッドやプロパティを持つオブジェクトが格納
+      // this.context.strokeStyle = this.brushColor;  //strokestyleで線の色を変える事が出来る
       this.context.lineJoin = "round";
-      this.context.strokeStyle = this.grayscale;  //
+      let color = this.grayscale.toString(16);
+      color = "#" + color + color +color;
+      this.context.strokeStyle = color;  //
       // this.context.lineWidth = this.brushSize;  //左辺のlineWidthが線の太さ。brushsizeは最初の方のpropsの中で登場. 
       // this.context.lineWidth = this.grayscale;  //デフォルト
 
@@ -276,10 +278,15 @@ export default {//JSでは{}はオブジェクト生成
     onBtnLayerClick: function(e) {
       this.layerActive = Number(e.srcElement.id.split("_")[2]);
     },
-    onSave: function() {  //消すとエラー？
+    onSave: function() {//[0]で最初のレイヤー、base64の形で処理するのが一番データ量が少ない、よく使われる形
+      let canvas = this.canvasGroup[0];
+      var base64 = canvas.toDataURL("image/jpeg");//base64に描いたデータが入っている、エンコードしている
+      // const base64 = canvas.toDataURL("image/jpeg");//効果なし
+
       axios
-        .post("https://www.ultratks.live/api/sketch/stroke/save_history", {
-          request_type: "save_history"
+        .post("http://localhost/save_history", {//中括弧で囲われているのは、送信したいデータ。JSの形
+          request_type: "save_history",
+          data: base64//このdataが描画されたデータ、これがapp.pyに送られる----------------------------------------------------------
         })
         .then(function(response) {
           if (response.data.response_type === "save_confirmed") {
@@ -326,8 +333,8 @@ export default {//JSでは{}はオブジェクト生成
       if (this.mode === "brush") {
         // color の数字を１６進数の色のカラーコードに変換。
         // color = this.colorConverter(this.brushColor);//必要？
-        // this.context.strokeStyle = 'red'; //strokestyleで線の色を変える.ここに追記！！！！！！！！！！！！
-        // this.context.strokeStyle = this.brushColor; //ここに追記！！！！！！！！！！！！
+        // this.context.strokeStyle = 'red'; //strokestyleで線の色を変える.
+        // this.context.strokeStyle = this.brushColor;
         this.context.strokeStyle = 0x808080; //ここに追記！！！！！！！！！！！！
 
         // this.context.strokeStyle = color; //デフォルト
@@ -338,8 +345,11 @@ export default {//JSでは{}はオブジェクト生成
         // brushSize: function() {
     grayscale: function() {
       if (this.mode === "brush") {
-        // this.context.lineWidth = this.grayscale; //左辺のlineWidthが線の太さ。strokeStyle
-        this.context.strokeStyle = this.grayscale; //左辺のlineWidthが線の太さ。strokeStyle
+        // this.context.lineWidth = this.grayscale; //左辺のlineWidthが線の太さ。
+        let color = this.grayscale.toString(16);
+        color = "#" + color + color +color;
+        this.context.strokeStyle = color;  //
+        // this.context.strokeStyle = this.grayscale; //
         // this.context.lineWidth = this.brushSize; //左辺のlineWidthが線の太さ。
       }
     },
